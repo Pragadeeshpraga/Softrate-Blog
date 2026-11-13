@@ -42,6 +42,7 @@ export default function Admin() {
   };
 
   const fetchBlogs = () => {
+    axios.get('http://onrender.com/api/blogs') // Fixed: Added axios.get()
       .then((res) => setBlogs(res.data))
       .catch((err) => console.error(err));
   };
