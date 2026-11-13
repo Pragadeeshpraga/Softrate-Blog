@@ -3,19 +3,22 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import BlogCard from '../components/BlogCard';
 
+// Your actual Render backend URL
+const API_URL = 'https://softrate-blog.onrender.com/api/blogs';
+
 export default function BlogDetails() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
   const [allBlogs, setAllBlogs] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://onrender.com/api/blogs/${slug}`)
+    axios.get(`${API_URL}/${slug}`)
       .then((res) => setBlog(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching blog details:', err));
 
-    axios.get('http://onrender.com/api/blogs')
+    axios.get(API_URL)
       .then((res) => setAllBlogs(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching all blogs:', err));
   }, [slug]);
 
   if (!blog) return <p style={{ padding: '2rem', textAlign: 'center' }}>Loading article...</p>;
