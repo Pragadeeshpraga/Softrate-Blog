@@ -42,7 +42,6 @@ export default function Admin() {
   };
 
   const fetchBlogs = () => {
-    axios.get('http://localhost:5000/api/blogs?all=true')
       .then((res) => setBlogs(res.data))
       .catch((err) => console.error(err));
   };
@@ -61,10 +60,10 @@ export default function Admin() {
     };
 
     if (editId) {
-      await axios.put(`http://localhost:5000/api/blogs/${editId}`, payload);
+      await axios.put(`http://onrender.com/api/blogs/${editId}`, payload);
       setEditId(null);
     } else {
-      await axios.post('http://localhost:5000/api/blogs', payload);
+      await axios.post('http://onrender.com/api/blogs', payload);
     }
 
     setForm({
@@ -99,7 +98,7 @@ export default function Admin() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+    await axios.delete(`http://onrender.com/api/blogs/${id}`);
     fetchBlogs();
   };
 

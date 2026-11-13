@@ -9,11 +9,11 @@ export default function BlogDetails() {
   const [allBlogs, setAllBlogs] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/blogs/${slug}`)
+    axios.get(`http://onrender.com/api/blogs/${slug}`)
       .then((res) => setBlog(res.data))
       .catch((err) => console.error(err));
 
-    axios.get('http://localhost:5000/api/blogs')
+    axios.get('http://onrender.com/api/blogs')
       .then((res) => setAllBlogs(res.data))
       .catch((err) => console.error(err));
   }, [slug]);

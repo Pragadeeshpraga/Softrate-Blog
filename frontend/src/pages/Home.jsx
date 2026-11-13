@@ -9,7 +9,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/blogs')
+    axios.get('http://onrender.com/api/blogs')
       .then((res) => setBlogs(res.data))
       .catch((err) => console.error(err));
   }, []);
