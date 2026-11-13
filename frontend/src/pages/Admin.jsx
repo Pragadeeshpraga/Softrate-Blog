@@ -11,6 +11,9 @@ const INITIAL_CATEGORIES = [
   'Industry Insights'
 ];
 
+// Your actual Render backend URL
+const API_URL = 'https://softrate-blog.onrender.com/api/blogs';
+
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(sessionStorage.getItem('softrate_admin') === 'true');
   const [email, setEmail] = useState('');
@@ -42,9 +45,9 @@ export default function Admin() {
   };
 
   const fetchBlogs = () => {
-    axios.get('http://onrender.com/api/blogs') // Fixed: Added axios.get()
+    axios.get(API_URL)
       .then((res) => setBlogs(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Fetch error:', err));
   };
 
   useEffect(() => {
@@ -60,26 +63,32 @@ export default function Admin() {
         : form.tags
     };
 
-    if (editId) {
-      await axios.put(`http://onrender.com/api/blogs/${editId}`, payload);
-      setEditId(null);
-    } else {
-      await axios.post('http://onrender.com/api/blogs', payload);
-    }
+    try {
+      if (editId) {
+        await axios.put(`${API_URL}/${editId}`, payload);
+        setEditId(null);
+      } else {
+        await axios.post(API_URL, payload);
+      }
 
-    setForm({
-      title: '',
-      author: '',
-      category: INITIAL_CATEGORIES[0],
-      description: '',
-      content: '',
-      thumbnail: '',
-      tags: '',
-      isFeatured: false,
-      status: 'published',
-      seoDescription: ''
-    });
-    fetchBlogs();
+      setForm({
+        title: '',
+        author: '',
+        category: INITIAL_CATEGORIES[0],
+        description: '',
+        content: '',
+        thumbnail: '',
+        tags: '',
+        isFeatured: false,
+        status: 'published',
+        seoDescription: ''
+      });
+      fetchBlogs();
+      alert('Article saved successfully!');
+    } catch (error) {
+      console.error('Save error:', error);
+      alert(`Failed to save: ${error.response?.data?.message || error.message}`);
+    }
   };
 
   const handleEdit = (blog) => {
@@ -99,13 +108,17 @@ export default function Admin() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://onrender.com/api/blogs/${id}`);
-    fetchBlogs();
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      fetchBlogs();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete article');
+    }
   };
 
   const publishedCount = blogs.filter((b) => b.status === 'published').length;
   const draftCount = blogs.filter((b) => b.status === 'draft').length;
-
   const displayedBlogs = blogs.filter((b) => {
     if (statusFilter === 'all') return true;
     return b.status === statusFilter;
@@ -144,7 +157,6 @@ export default function Admin() {
           Logout
         </button>
       </div>
-
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '3rem', background: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
         <input placeholder="Article Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
         <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
@@ -158,7 +170,6 @@ export default function Admin() {
         <textarea placeholder="Full Article Content" rows="6" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} required />
         <input placeholder="Tags (comma-separated, e.g. React, MongoDB, Cloud)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
         <input placeholder="SEO Meta Description" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
-
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
             <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} style={{ width: 'auto' }} />
@@ -169,12 +180,10 @@ export default function Admin() {
             <option value="draft">Draft</option>
           </select>
         </div>
-
         <button type="submit" style={{ background: '#2563eb', color: '#fff' }}>
           {editId ? 'Save Changes' : 'Save Article'}
         </button>
       </form>
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
         <h2 style={{ margin: 0 }}>Manage Articles</h2>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -216,7 +225,6 @@ export default function Admin() {
           </button>
         </div>
       </div>
-
       {displayedBlogs.map((b) => (
         <div key={b._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '0.6rem' }}>
           <div>
