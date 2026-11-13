@@ -3,15 +3,18 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import BlogCard from '../components/BlogCard';
 
+// Your actual Render backend URL
+const API_URL = 'https://softrate-blog.onrender.com/api/blogs';
+
 export default function Home() {
   const [blogs, setBlogs] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
-    axios.get('http://onrender.com/api/blogs')
+    axios.get(API_URL)
       .then((res) => setBlogs(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching blogs:', err));
   }, []);
 
   const featuredBlogs = blogs.filter((b) => b.isFeatured);
@@ -51,7 +54,7 @@ export default function Home() {
           placeholder="Search articles..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: '1rem', width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
         />
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
