@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const INITIAL_CATEGORIES = [
@@ -21,7 +22,8 @@ export default function Admin() {
   const [blogs, setBlogs] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({
+  
+  const initialFormState = {
     title: '',
     author: '',
     category: INITIAL_CATEGORIES[0],
@@ -32,7 +34,9 @@ export default function Admin() {
     isFeatured: false,
     status: 'published',
     seoDescription: ''
-  });
+  };
+
+  const [form, setForm] = useState(initialFormState);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -71,18 +75,7 @@ export default function Admin() {
         await axios.post(API_URL, payload);
       }
 
-      setForm({
-        title: '',
-        author: '',
-        category: INITIAL_CATEGORIES[0],
-        description: '',
-        content: '',
-        thumbnail: '',
-        tags: '',
-        isFeatured: false,
-        status: 'published',
-        seoDescription: ''
-      });
+      setForm(initialFormState);
       fetchBlogs();
       alert('Article saved successfully!');
     } catch (error) {
@@ -107,7 +100,14 @@ export default function Admin() {
     });
   };
 
+  const handleCancelEdit = () => {
+    setEditId(null);
+    setForm(initialFormState);
+  };
+
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this article?")) return;
+    
     try {
       await axios.delete(`${API_URL}/${id}`);
       fetchBlogs();
@@ -135,6 +135,7 @@ export default function Admin() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
           />
           <input
             type="password"
@@ -142,8 +143,9 @@ export default function Admin() {
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
             required
+            style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
           />
-          <button type="submit" style={{ background: '#2563eb', color: '#fff' }}>Login</button>
+          <button type="submit" style={{ background: '#2563eb', color: '#fff', padding: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>Login</button>
         </form>
       </div>
     );
@@ -151,25 +153,38 @@ export default function Admin() {
 
   return (
     <div style={{ maxWidth: '850px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      
+      {/* HEADER SECTION WITH AUTHORS BUTTON & LOGOUT */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1>{editId ? 'Edit Article' : 'Publish New Article'}</h1>
-        <button onClick={() => { sessionStorage.removeItem('softrate_admin'); setIsAuthenticated(false); }} style={{ background: '#64748b', color: '#fff' }}>
-          Logout
-        </button>
+        
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Link to="/authors" style={{ background: '#0f172a', color: '#fff', textDecoration: 'none', padding: '0.6rem 1rem', borderRadius: '6px', fontWeight: '600' }}>
+            Manage Authors
+          </Link>
+          <button onClick={() => { sessionStorage.removeItem('softrate_admin'); setIsAuthenticated(false); }} style={{ background: '#64748b', color: '#fff', padding: '0.6rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: '600' }}>
+            Logout
+          </button>
+        </div>
       </div>
+      
+      {/* FORM SECTION */}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '3rem', background: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-        <input placeholder="Article Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+        <input placeholder="Article Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}/>
+        
         <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-          <input placeholder="Author Name" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={{ flex: 1 }} required />
+          <input placeholder="Author Name" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={{ flex: 1, padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} required />
           <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
             {INITIAL_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
           </select>
         </div>
-        <input placeholder="Thumbnail Image URL (optional)" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
-        <input placeholder="Short Excerpt / Summary" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
-        <textarea placeholder="Full Article Content" rows="6" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} required />
-        <input placeholder="Tags (comma-separated, e.g. React, MongoDB, Cloud)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
-        <input placeholder="SEO Meta Description" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
+        
+        <input placeholder="Thumbnail Image URL (optional)" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}/>
+        <input placeholder="Short Excerpt / Summary" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}/>
+        <textarea placeholder="Full Article Content" rows="6" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} required style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1', resize: 'vertical' }}/>
+        <input placeholder="Tags (comma-separated, e.g. React, MongoDB, Cloud)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}/>
+        <input placeholder="SEO Meta Description" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}/>
+        
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
             <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} style={{ width: 'auto' }} />
@@ -180,10 +195,20 @@ export default function Admin() {
             <option value="draft">Draft</option>
           </select>
         </div>
-        <button type="submit" style={{ background: '#2563eb', color: '#fff' }}>
-          {editId ? 'Save Changes' : 'Save Article'}
-        </button>
+        
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+          <button type="submit" style={{ flex: 1, background: '#2563eb', color: '#fff', padding: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+            {editId ? 'Save Changes' : 'Save Article'}
+          </button>
+          {editId && (
+            <button type="button" onClick={handleCancelEdit} style={{ flex: 1, background: '#e2e8f0', color: '#0f172a', padding: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </form>
+
+      {/* FILTER BUTTONS & COUNTS */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
         <h2 style={{ margin: 0 }}>Manage Articles</h2>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -194,7 +219,11 @@ export default function Admin() {
               background: statusFilter === 'all' ? '#0f172a' : '#e2e8f0',
               color: statusFilter === 'all' ? '#fff' : '#0f172a',
               fontSize: '0.85rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '4px',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             All ({blogs.length})
@@ -206,7 +235,11 @@ export default function Admin() {
               background: statusFilter === 'published' ? '#16a34a' : '#dcfce7',
               color: statusFilter === 'published' ? '#fff' : '#166534',
               fontSize: '0.85rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '4px',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             Published ({publishedCount})
@@ -218,13 +251,19 @@ export default function Admin() {
               background: statusFilter === 'draft' ? '#ca8a04' : '#fef9c3',
               color: statusFilter === 'draft' ? '#fff' : '#854d0e',
               fontSize: '0.85rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '4px',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             Drafts ({draftCount})
           </button>
         </div>
       </div>
+      
+      {/* ARTICLES LIST */}
       {displayedBlogs.map((b) => (
         <div key={b._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '0.6rem' }}>
           <div>
@@ -235,8 +274,8 @@ export default function Admin() {
             {b.isFeatured && <span style={{ marginLeft: '0.4rem', fontSize: '0.8rem', color: '#2563eb' }}>★ Featured</span>}
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => handleEdit(b)} style={{ background: '#e2e8f0' }}>Edit</button>
-            <button onClick={() => handleDelete(b._id)} style={{ background: '#fee2e2', color: '#dc2626' }}>Delete</button>
+            <button onClick={() => handleEdit(b)} style={{ background: '#e2e8f0', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}>Edit</button>
+            <button onClick={() => handleDelete(b._id)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
           </div>
         </div>
       ))}

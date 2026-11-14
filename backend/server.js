@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Blog = require('./models/Blog');
-
+const Aythor = require('./models/Author');
 const app = express();
 
 app.use(cors());
@@ -75,6 +75,36 @@ app.delete('/api/blogs/:id', async (req, res) => {
   try {
     await Blog.findByIdAndDelete(req.params.id);
     res.json({ message: 'Article deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+// GET all authors
+app.get('/api/authors', async (req, res) => {
+  try {
+    const authors = await Author.find().sort({ createdAt: -1 });
+    res.json(authors);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST create a new author
+app.post('/api/authors', async (req, res) => {
+  try {
+    const newAuthor = new Author(req.body);
+    const savedAuthor = await newAuthor.save();
+    res.status(201).json(savedAuthor);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// DELETE an author by ID
+app.delete('/api/authors/:id', async (req, res) => {
+  try {
+    await Author.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Author deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
