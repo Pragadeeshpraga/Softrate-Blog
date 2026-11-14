@@ -31,6 +31,12 @@ export default function BlogDetails() {
   const nextBlog = currentIndex < allBlogs.length - 1 ? allBlogs[currentIndex + 1] : null;
   const relatedBlogs = allBlogs.filter((b) => b.category === blog.category && b.slug !== blog.slug).slice(0, 2);
 
+  // Extract Author Details safely whether it's an object or a fallback string
+  const isAuthorObj = typeof blog.author === 'object' && blog.author !== null;
+  const authorName = isAuthorObj ? blog.author.name : blog.author || 'Admin';
+  const authorRole = isAuthorObj ? blog.author.role : '';
+  const authorAvatar = isAuthorObj && blog.author.avatar ? blog.author.avatar : null;
+
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
       <Link to="/blogs" style={{ color: '#2563eb', textDecoration: 'none' }}>← Back to Articles</Link>
@@ -40,9 +46,25 @@ export default function BlogDetails() {
           {blog.category}
         </span>
         <h1 style={{ margin: '0.8rem 0', fontSize: '2rem' }}>{blog.title}</h1>
-        <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-          By <strong>{blog.author}</strong> • {new Date(blog.createdAt).toLocaleDateString()} • {readingTime} min read
-        </p>
+        
+        {/* Author Metadata Display */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1rem 0', color: '#64748b', fontSize: '0.95rem' }}>
+          {authorAvatar && (
+            <img 
+              src={authorAvatar} 
+              alt={authorName} 
+              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
+            />
+          )}
+          <div>
+            <div>
+              By <strong>{authorName}</strong> {authorRole && <span style={{ color: '#2563eb', fontSize: '0.85rem' }}>({authorRole})</span>}
+            </div>
+            <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+              {new Date(blog.createdAt).toLocaleDateString()} • {readingTime} min read
+            </div>
+          </div>
+        </div>
       </div>
 
       {blog.thumbnail && (

@@ -17,7 +17,7 @@ const createSlug = (text) => {
     .replace(/^-+|-+$/g, '');
 };
 
-
+// ==================== BLOG ROUTES ====================
 
 // GET all blogs (auto-publishes due scheduled posts; filters out drafts/future scheduled unless ?all=true)
 app.get('/api/blogs', async (req, res) => {
@@ -28,16 +28,19 @@ app.get('/api/blogs', async (req, res) => {
     );
 
     const filter = req.query.all === 'true' ? {} : { status: 'published' };
-    const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+    const blogs = await Blog.find(filter)
+      .populate('author')
+      .sort({ createdAt: -1 });
     res.json(blogs);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 // GET single blog by SEO slug
 app.get('/api/blogs/:slug', async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug });
+    const blog = await Blog.findOne({ slug: req.params.slug }).populate('author');
     if (!blog) return res.status(404).json({ message: 'Article not found' });
     res.json(blog);
   } catch (err) {
@@ -51,12 +54,16 @@ app.post('/api/blogs', async (req, res) => {
     const baseSlug = req.body.slug ? createSlug(req.body.slug) : createSlug(req.body.title);
     const uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
 
-    const newBlog = new Blog({
+    const blogData = {
       ...req.body,
-      slug: uniqueSlug
-    });
+      author: req.body.author || null,
+      slug: uniqueSlug,
+    };
+
+    const newBlog = new Blog(blogData);
     const savedBlog = await newBlog.save();
-    res.status(201).json(savedBlog);
+    const populatedBlog = await savedBlog.populate('author');
+    res.status(201).json(populatedBlog);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -65,11 +72,16 @@ app.post('/api/blogs', async (req, res) => {
 // PUT update an existing blog by ID
 app.put('/api/blogs/:id', async (req, res) => {
   try {
+    const updateData = {
+      ...req.body,
+      author: req.body.author || null,
+    };
+
     const updatedBlog = await Blog.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true }
-    );
+    ).populate('author');
     res.json(updatedBlog);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -85,6 +97,9 @@ app.delete('/api/blogs/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// ==================== AUTHOR ROUTES ====================
+
 // GET all authors
 app.get('/api/authors', async (req, res) => {
   try {
@@ -98,9 +113,35 @@ app.get('/api/authors', async (req, res) => {
 // POST create a new author
 app.post('/api/authors', async (req, res) => {
   try {
-    const newAuthor = new Author(req.body);
+    const { name, role, bio, avatar, socialLinks } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Author name is required' });
+    }
+
+    const newAuthor = new Author({
+      name,
+      role,
+      bio,
+      avatar,
+      socialLinks,
+    });
     const savedAuthor = await newAuthor.save();
     res.status(201).json(savedAuthor);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// PUT update an existing author by ID
+app.put('/api/authors/:id', async (req, res) => {
+  try {
+    const updatedAuthor = await Author.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!updatedAuthor) return res.status(404).json({ message: 'Author not found' });
+    res.json(updatedAuthor);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

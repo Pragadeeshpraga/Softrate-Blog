@@ -6,7 +6,7 @@ import BlogList from './pages/BlogList';
 import BlogDetails from './pages/BlogDetails';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
-import Authors from './pages/Authors';
+
 
 export default function App() {
   return (
@@ -20,7 +20,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogDetails />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
-<Route path="/authors" element={<Authors />} />
+
           </Routes>
         </main>
         <Footer />

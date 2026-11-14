@@ -7,6 +7,11 @@ export default function BlogCard({ blog }) {
     year: 'numeric'
   });
 
+  // Handle both string author names and populated author objects
+  const authorName = typeof blog.author === 'object' && blog.author !== null 
+    ? blog.author.name 
+    : blog.author || 'Admin';
+
   return (
     <article style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
      <img
@@ -26,7 +31,7 @@ export default function BlogCard({ blog }) {
         <h3 style={{ margin: '0.6rem 0', fontSize: '1.15rem' }}>{blog.title}</h3>
         <p style={{ color: '#475569', fontSize: '0.92rem', flex: 1 }}>{blog.description}</p>
         <div style={{ marginTop: '1rem', paddingTop: '0.8rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: '#64748b' }}>
-          <span>{blog.author} • {formattedDate}</span>
+          <span>By {authorName} • {formattedDate}</span>
           <Link to={`/blog/${blog.slug}`} style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>
             Read →
           </Link>
