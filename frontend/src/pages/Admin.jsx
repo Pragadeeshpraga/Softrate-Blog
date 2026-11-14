@@ -47,7 +47,7 @@ export default function Admin() {
   };
 
   const fetchBlogs = () => {
-    axios.get('http://localhost:5000/api/blogs?all=true')
+    axios.get('https://softrate-blog.onrender.com/api/blogs?all=true')
       .then((res) => setBlogs(res.data))
       .catch((err) => console.error('Error fetching blogs:', err));
   };
@@ -96,9 +96,9 @@ export default function Admin() {
     };
 
     if (editId) {
-      await axios.put(`http://localhost:5000/api/blogs/${editId}`, payload);
+      await axios.put(`https://softrate-blog.onrender.com/api/blogs/${editId}`, payload);
     } else {
-      await axios.post('http://localhost:5000/api/blogs', payload);
+      await axios.post('https://softrate-blog.onrender.com/api/blogs', payload);
     }
 
     resetForm();
@@ -129,7 +129,7 @@ export default function Admin() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+    await axios.delete(`https://softrate-blog.onrender.com/api/blogs/${id}`);
     fetchBlogs();
   };
 
