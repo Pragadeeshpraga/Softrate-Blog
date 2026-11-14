@@ -19,7 +19,7 @@ export default function Authors() {
   }, [isAuthenticated, navigate]);
 
   const fetchAuthors = () => {
-    axios.get('https://softrate-blog.onrender.com/api/authors')
+    axios.get('http://localhost:5000/api/authors')
       .then((res) => setAuthors(res.data))
       .catch((err) => console.error(err));
   };
@@ -28,7 +28,7 @@ export default function Authors() {
     e.preventDefault();
     setError('');
     try {
-      await axios.post('https://softrate-blog.onrender.com/api/authors', form);
+      await axios.post('http://localhost:5000/api/authors', form);
       setForm({ name: '', email: '', bio: '' });
       fetchAuthors();
     } catch (err) {
@@ -37,7 +37,7 @@ export default function Authors() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`https://softrate-blog.onrender.com/api/authors/${id}`);
+    await axios.delete(`http://localhost:5000/api/authors/${id}`);
     fetchAuthors();
   };
 
