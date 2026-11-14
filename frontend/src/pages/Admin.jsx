@@ -49,7 +49,7 @@ export default function Admin() {
   const fetchBlogs = () => {
     axios.get('http://localhost:5000/api/blogs?all=true')
       .then((res) => setBlogs(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error('Error fetching blogs:', err));
   };
 
   useEffect(() => {
@@ -133,6 +133,11 @@ export default function Admin() {
     fetchBlogs();
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('softrate_admin');
+    setIsAuthenticated(false);
+  };
+
   const publishedCount = blogs.filter((b) => b.status === 'published').length;
   const scheduledCount = blogs.filter((b) => b.status === 'scheduled').length;
   const draftCount = blogs.filter((b) => b.status === 'draft').length;
@@ -168,191 +173,209 @@ export default function Admin() {
   }
 
   return (
-    <div style={{ maxWidth: '880px', margin: '2rem auto', padding: '0 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1>{editId ? 'Edit Article' : 'Publish New Article'}</h1>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Link to="/authors" style={{ background: '#0f172a', color: '#fff', textDecoration: 'none', padding: '0.6rem 1rem', borderRadius: '6px', fontWeight: '600' }}>
-            Manage Authors
-          </Link>
-          <button onClick={() => { sessionStorage.removeItem('softrate_admin'); setIsAuthenticated(false); }} style={{ background: '#64748b', color: '#fff' }}>
-            Logout
-          </button>
+    <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', background: '#f8fafc' }}>
+      {/* Left Admin Sidebar (Matches Authors Page) */}
+      <aside style={{ width: '240px', background: '#1e2227', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.5rem 1rem', flexShrink: 0 }}>
+        <div>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '2rem', paddingLeft: '0.5rem' }}>Admin Panel</h2>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Link to="/admin" style={{ background: '#0d6efd', color: '#fff', textDecoration: 'none', padding: '0.7rem 1rem', borderRadius: '6px', fontWeight: '600' }}>
+              Dashboard / Posts
+            </Link>
+            <Link to="/authors" style={{ color: '#cbd5e1', textDecoration: 'none', padding: '0.7rem 1rem', borderRadius: '6px' }}>
+              Authors
+            </Link>
+            <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none', padding: '0.7rem 1rem', borderRadius: '6px' }}>
+              View Website
+            </Link>
+          </nav>
         </div>
-      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '3rem', background: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-        <input placeholder="Article Title *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-          <input placeholder="Author Name *" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={{ flex: 1 }} />
-          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-            {INITIAL_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-        </div>
-        <input placeholder="Thumbnail Image URL (optional)" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
-        <input placeholder="Short Excerpt / Summary *" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-        <textarea placeholder="Full Article Content *" rows="6" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
-        <input placeholder="Tags (comma-separated, e.g. React, MongoDB, Cloud)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+        <button
+          onClick={handleLogout}
+          style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '0.6rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+        >
+          Logout
+        </button>
+      </aside>
 
-        {/* SEO Metadata Box */}
-        <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc' }}>
-          <strong style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem' }}>SEO Metadata (Search Engine Optimization)</strong>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.8rem' }}>
-            <input placeholder="SEO Meta Title (Defaults to article title)" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
-            <input placeholder="SEO Meta Description (Defaults to excerpt)" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
+      {/* Main Content Area */}
+      <div style={{ flex: 1, padding: '2rem 2.5rem', maxWidth: '1000px' }}>
+        <h1 style={{ marginBottom: '1.5rem', color: '#0f172a' }}>{editId ? 'Edit Article' : 'Publish New Article'}</h1>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', marginBottom: '3rem', background: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <input placeholder="Article Title *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+            <input placeholder="Author Name *" value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={{ flex: 1 }} />
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+              {INITIAL_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
           </div>
-        </div>
+          <input placeholder="Thumbnail Image URL (optional)" value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
+          <input placeholder="Short Excerpt / Summary *" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <textarea placeholder="Full Article Content *" rows="6" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+          <input placeholder="Tags (comma-separated, e.g. React, MongoDB, Cloud)" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
 
-        {/* Featured Checkbox */}
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '600' }}>
-            <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} style={{ width: 'auto' }} />
-            Mark as Featured Article
-          </label>
-        </div>
-
-        {/* Date & Time Picker when Schedule Article is clicked */}
-        {showSchedulePicker && (
-          <div style={{ background: '#fefce8', border: '1px solid #fde047', padding: '1rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <label style={{ fontWeight: '600', color: '#854d0e' }}>Select Publish Date & Time:</label>
-            <input
-              type="datetime-local"
-              value={form.scheduledAt}
-              onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
-              style={{ width: 'auto', padding: '0.5rem', borderRadius: '6px', border: '1px solid #ca8a04' }}
-            />
-            <button
-              type="button"
-              onClick={() => saveArticle('scheduled')}
-              style={{ background: '#eab308', color: '#0f172a', fontWeight: '700', padding: '0.55rem 1.1rem' }}
-            >
-              Confirm Schedule
-            </button>
+          {/* SEO Metadata Box */}
+          <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', background: '#f8fafc' }}>
+            <strong style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.95rem' }}>SEO Metadata (Search Engine Optimization)</strong>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.8rem' }}>
+              <input placeholder="SEO Meta Title (Defaults to article title)" value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} />
+              <input placeholder="SEO Meta Description (Defaults to excerpt)" value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} />
+            </div>
           </div>
-        )}
 
-        {/* Action Buttons Row matching your screenshot */}
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-          <button
-            type="button"
-            onClick={() => saveArticle('published')}
-            style={{ background: '#0d6efd', color: '#fff', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
-          >
-            Publish Article Now
-          </button>
+          {/* Featured Checkbox */}
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: '600' }}>
+              <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} style={{ width: 'auto' }} />
+              Mark as Featured Article
+            </label>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setShowSchedulePicker((prev) => !prev)}
-            style={{ background: '#f59e0b', color: '#0f172a', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
-          >
-            Schedule Article
-          </button>
-
-          <button
-            type="button"
-            onClick={() => saveArticle('draft')}
-            style={{ background: '#fff', color: '#334155', border: '1px solid #cbd5e1', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
-          >
-            Save as Draft
-          </button>
-
-          {editId && (
-            <button
-              type="button"
-              onClick={resetForm}
-              style={{ background: '#f1f5f9', color: '#475569', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
-            >
-              Cancel
-            </button>
+          {/* Date & Time Picker when Schedule Article is clicked */}
+          {showSchedulePicker && (
+            <div style={{ background: '#fefce8', border: '1px solid #fde047', padding: '1rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <label style={{ fontWeight: '600', color: '#854d0e' }}>Select Publish Date & Time:</label>
+              <input
+                type="datetime-local"
+                value={form.scheduledAt}
+                onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+                style={{ width: 'auto', padding: '0.5rem', borderRadius: '6px', border: '1px solid #ca8a04' }}
+              />
+              <button
+                type="button"
+                onClick={() => saveArticle('scheduled')}
+                style={{ background: '#eab308', color: '#0f172a', fontWeight: '700', padding: '0.55rem 1.1rem' }}
+              >
+                Confirm Schedule
+              </button>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* Manage Articles Header + Filter Badges */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0 }}>Manage Articles</h2>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('all')}
-            style={{
-              background: statusFilter === 'all' ? '#0f172a' : '#e2e8f0',
-              color: statusFilter === 'all' ? '#fff' : '#0f172a',
-              fontSize: '0.85rem',
-              fontWeight: '600'
-            }}
-          >
-            All ({blogs.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('published')}
-            style={{
-              background: statusFilter === 'published' ? '#16a34a' : '#dcfce7',
-              color: statusFilter === 'published' ? '#fff' : '#166534',
-              fontSize: '0.85rem',
-              fontWeight: '600'
-            }}
-          >
-            Published ({publishedCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('scheduled')}
-            style={{
-              background: statusFilter === 'scheduled' ? '#d97706' : '#ffedd5',
-              color: statusFilter === 'scheduled' ? '#fff' : '#9a3412',
-              fontSize: '0.85rem',
-              fontWeight: '600'
-            }}
-          >
-            Scheduled ({scheduledCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('draft')}
-            style={{
-              background: statusFilter === 'draft' ? '#ca8a04' : '#fef9c3',
-              color: statusFilter === 'draft' ? '#fff' : '#854d0e',
-              fontSize: '0.85rem',
-              fontWeight: '600'
-            }}
-          >
-            Drafts ({draftCount})
-          </button>
-        </div>
-      </div>
+          {/* Action Buttons Row */}
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => saveArticle('published')}
+              style={{ background: '#0d6efd', color: '#fff', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
+            >
+              Publish Article Now
+            </button>
 
-      {displayedBlogs.map((b) => (
-        <div key={b._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '0.6rem' }}>
-          <div>
-            <strong>{b.title}</strong>
-            <span
+            <button
+              type="button"
+              onClick={() => setShowSchedulePicker((prev) => !prev)}
+              style={{ background: '#f59e0b', color: '#0f172a', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
+            >
+              Schedule Article
+            </button>
+
+            <button
+              type="button"
+              onClick={() => saveArticle('draft')}
+              style={{ background: '#fff', color: '#334155', border: '1px solid #cbd5e1', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
+            >
+              Save as Draft
+            </button>
+
+            {editId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                style={{ background: '#f1f5f9', color: '#475569', fontWeight: '600', padding: '0.7rem 1.3rem', borderRadius: '6px' }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Manage Articles Header + Filter Badges */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+          <h2 style={{ margin: 0 }}>Manage Articles</h2>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('all')}
               style={{
-                marginLeft: '0.6rem',
-                fontSize: '0.8rem',
-                padding: '0.15rem 0.5rem',
-                borderRadius: '4px',
-                background: b.status === 'published' ? '#dcfce7' : b.status === 'scheduled' ? '#ffedd5' : '#fef9c3',
-                color: b.status === 'published' ? '#166534' : b.status === 'scheduled' ? '#9a3412' : '#854d0e'
+                background: statusFilter === 'all' ? '#0f172a' : '#e2e8f0',
+                color: statusFilter === 'all' ? '#fff' : '#0f172a',
+                fontSize: '0.85rem',
+                fontWeight: '600'
               }}
             >
-              {b.status}
-            </span>
-            {b.status === 'scheduled' && b.scheduledAt && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', color: '#9a3412' }}>
-                ({new Date(b.scheduledAt).toLocaleString()})
-              </span>
-            )}
-            {b.isFeatured && <span style={{ marginLeft: '0.4rem', fontSize: '0.8rem', color: '#2563eb' }}>★ Featured</span>}
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => handleEdit(b)} style={{ background: '#e2e8f0' }}>Edit</button>
-            <button onClick={() => handleDelete(b._id)} style={{ background: '#fee2e2', color: '#dc2626' }}>Delete</button>
+              All ({blogs.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('published')}
+              style={{
+                background: statusFilter === 'published' ? '#16a34a' : '#dcfce7',
+                color: statusFilter === 'published' ? '#fff' : '#166534',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}
+            >
+              Published ({publishedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('scheduled')}
+              style={{
+                background: statusFilter === 'scheduled' ? '#d97706' : '#ffedd5',
+                color: statusFilter === 'scheduled' ? '#fff' : '#9a3412',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}
+            >
+              Scheduled ({scheduledCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('draft')}
+              style={{
+                background: statusFilter === 'draft' ? '#ca8a04' : '#fef9c3',
+                color: statusFilter === 'draft' ? '#fff' : '#854d0e',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}
+            >
+              Drafts ({draftCount})
+            </button>
           </div>
         </div>
-      ))}
+
+        {displayedBlogs.map((b) => (
+          <div key={b._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.9rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '0.6rem' }}>
+            <div>
+              <strong>{b.title}</strong>
+              <span
+                style={{
+                  marginLeft: '0.6rem',
+                  fontSize: '0.8rem',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '4px',
+                  background: b.status === 'published' ? '#dcfce7' : b.status === 'scheduled' ? '#ffedd5' : '#fef9c3',
+                  color: b.status === 'published' ? '#166534' : b.status === 'scheduled' ? '#9a3412' : '#854d0e'
+                }}
+              >
+                {b.status}
+              </span>
+              {b.status === 'scheduled' && b.scheduledAt && (
+                <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', color: '#9a3412' }}>
+                  ({new Date(b.scheduledAt).toLocaleString()})
+                </span>
+              )}
+              {b.isFeatured && <span style={{ marginLeft: '0.4rem', fontSize: '0.8rem', color: '#2563eb' }}>★ Featured</span>}
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => handleEdit(b)} style={{ background: '#e2e8f0' }}>Edit</button>
+              <button onClick={() => handleDelete(b._id)} style={{ background: '#fee2e2', color: '#dc2626' }}>Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
