@@ -6,10 +6,7 @@ const blogSchema = new mongoose.Schema({
   description: { type: String, required: true },
   content: { type: String, required: true },
   author: {
-    type: mongoose.Schema.Types.Mixed, // Allows either an ObjectId reference or a String name (e.g., 'Admin')
-    ref: "Author",
-    default: null,
-  },
+    type: String,default:'Admin'},
   category: { type: String, required: true },
   tags: { type: [String], default: [] },
   thumbnail: { type: String, default: '' },
