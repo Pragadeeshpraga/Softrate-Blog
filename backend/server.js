@@ -17,9 +17,16 @@ const createSlug = (text) => {
     .replace(/^-+|-+$/g, '');
 };
 
-// GET all blogs (filters out drafts unless ?all=true is passed from Admin)
+
+
+// GET all blogs (auto-publishes due scheduled posts; filters out drafts/future scheduled unless ?all=true)
 app.get('/api/blogs', async (req, res) => {
   try {
+    await Blog.updateMany(
+      { status: 'scheduled', scheduledAt: { $lte: new Date() } },
+      { $set: { status: 'published' } }
+    );
+
     const filter = req.query.all === 'true' ? {} : { status: 'published' };
     const blogs = await Blog.find(filter).sort({ createdAt: -1 });
     res.json(blogs);
@@ -27,7 +34,6 @@ app.get('/api/blogs', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 // GET single blog by SEO slug
 app.get('/api/blogs/:slug', async (req, res) => {
   try {

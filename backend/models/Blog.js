@@ -10,7 +10,8 @@ const blogSchema = new mongoose.Schema({
   tags: { type: [String], default: [] },
   thumbnail: { type: String, default: '' },
   isFeatured: { type: Boolean, default: false },
-  status: { type: String, enum: ['draft', 'published'], default: 'published' },
+  status: { type: String, enum: ['draft', 'published', 'scheduled'], default: 'published' },
+  scheduledAt: { type: Date, default: null },
   seoTitle: { type: String, default: '' },
   seoDescription: { type: String, default: '' }
 }, { timestamps: true });
